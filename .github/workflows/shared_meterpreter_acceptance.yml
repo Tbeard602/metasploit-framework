@@ -135,10 +135,8 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           REM pcap dependencies
-          powershell -Command "[System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true} ; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('https://www.winpcap.org/install/bin/WpdPack_4_1_2.zip', 'C:\Windows\Temp\WpdPack_4_1_2.zip')"
-
-          choco install 7zip.installServerCertificateValidationCallback
-          7z x "C:\Windows\Temp\WpdPack_4_1_2.zip" -o"C:\"
+          powershell -NoProfile -Command "$ErrorActionPreference = 'Stop'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://www.winpcap.org/install/bin/WpdPack_4_1_2.zip' -OutFile 'C:\\Windows\\Temp\\WpdPack_4_1_2.zip'; Expand-Archive -LiteralPath 'C:\\Windows\\Temp\\WpdPack_4_1_2.zip' -DestinationPath 'C:\\' -Force"
+          if errorlevel 1 exit /b 1
 
           dir C:\\
 
@@ -202,7 +200,7 @@ jobs:
           # Required for macos13 pg gem compilation
           PKG_CONFIG_PATH: "/usr/local/opt/libpq/lib/pkgconfig"
         # Pinned to avoid Windows compilation failure with nokogiri
-        uses: ruby/setup-ruby@eaecf785f6a34567a6d97f686bbb7bccc1ac1e5c
+        uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -369,7 +367,7 @@ jobs:
         if: always()
         env:
           BUNDLE_FORCE_RUBY_PLATFORM: true
-        uses: ruby/setup-ruby@eaecf785f6a34567a6d97f686bbb7bccc1ac1e5c
+        uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f
         with:
           ruby-version: '3.3'
           bundler-cache: true
